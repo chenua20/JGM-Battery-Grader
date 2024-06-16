@@ -1,0 +1,289 @@
+<!DOCTYPE HTML><html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <style>
+    body {
+      min-width: 310px;
+    	max-width: 800px;
+    	height: 400px;
+      margin: 0 auto;
+    }
+    h2 {
+      font-family: Arial;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+    table, th, td {
+      border: 1px solid black;
+      border-color: #96D4D4;
+    }
+  </style>
+</head>
+<body>
+  <h2>INA219 Readings</h2>
+
+  <table id="myTable" border="1">
+    <tr>
+      <td>Voltage</td>
+      <td>Current</td>
+      <td>Power</td>
+      <td>Capacity</td>
+    </tr>
+    <tr>
+      <td id="voltage">Voltage</td>
+      <td id="current">Current</td>
+      <td id="power">Power</td>
+      <td id="capacity">Capacity</td>
+    </tr>
+  </table>
+
+  <script>
+  function updateTable() {
+    fetch('/voltage')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('voltage').innerText = data;
+        })
+        .catch(error => console.error('Error:', error));
+
+    fetch('/current')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('current').innerText = data;
+        })
+        .catch(error => console.error('Error:', error));
+
+    fetch('/power')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('power').innerText = data;
+        })
+        .catch(error => console.error('Error:', error));
+
+    fetch('/capacity')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('capacity').innerText = data;
+        })
+        .catch(error => console.error('Error:', error));
+  }
+
+  // Update the table every second
+  setInterval(updateTable, 1000);
+  </script>
+  
+  <div id="graphV" style="display: none;">
+    <div id="chart-voltage" class="container"></div>
+  </div>
+  <div id="graphI" style="display: none;">
+    <div id="chart-current" class="container"></div>
+  </div>
+  <div id="graphP" style="display: none;">
+    <div id="chart-power" class="container"></div>
+  </div>
+  <div id="graphC" style="display: none;">
+    <div id="chart-capacity" class="container"></div>
+  </div>
+  
+  <script>
+  document.getElementById('myTable').rows[1].cells[0].onclick = function() {
+    var graph = document.getElementById('graphV');
+    if (graph.style.display === 'none') {
+        graph.style.display = 'block';
+    } else {
+        graph.style.display = 'none';
+    }
+  }
+  </script>
+  <script>
+  document.getElementById('myTable').rows[1].cells[1].onclick = function() {
+    var graph = document.getElementById('graphI');
+    if (graph.style.display === 'none') {
+        graph.style.display = 'block';
+    } else {
+        graph.style.display = 'none';
+    }
+  }
+  </script>
+  <script>
+  document.getElementById('myTable').rows[1].cells[2].onclick = function() {
+    var graph = document.getElementById('graphP');
+    if (graph.style.display === 'none') {
+        graph.style.display = 'block';
+    } else {
+        graph.style.display = 'none';
+    }
+  }
+  </script>
+  <script>
+  document.getElementById('myTable').rows[1].cells[3].onclick = function() {
+    var graph = document.getElementById('graphC');
+    if (graph.style.display === 'none') {
+        graph.style.display = 'block';
+    } else {
+        graph.style.display = 'none';
+    }
+  }
+  </script>
+  </body>
+<script>
+var chartV = new Highcharts.Chart({
+  chart:{ renderTo : 'chart-voltage' },
+  title: { text: 'INA219 Voltage' },
+  series: [{
+    showInLegend: false,
+    data: []
+  }],
+  plotOptions: {
+    line: { animation: false,
+      dataLabels: { enabled: true }
+    },
+    series: { color: '#059e8a' }
+  },
+  xAxis: { type: 'datetime',
+    dateTimeLabelFormats: { second: '%H:%M:%S' }
+  },
+  yAxis: {
+    title: { text: 'Voltage (V)' }
+  },
+  credits: { enabled: false }
+});
+setInterval(function ( ) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var x = (new Date()).getTime(),
+          y = parseFloat(this.responseText);
+      //console.log(this.responseText);
+      if(chartV.series[0].data.length > 40) {
+        chartV.series[0].addPoint([x, y], true, true, true);
+      } else {
+        chartV.series[0].addPoint([x, y], true, false, true);
+      }
+    }
+  };
+  xhttp.open("GET", "/voltage", true);
+  xhttp.send();
+}, 1000 ) ;
+
+var chartI = new Highcharts.Chart({
+  chart:{ renderTo:'chart-current' },
+  title: { text: 'INA219 Current' },
+  series: [{
+    showInLegend: false,
+    data: []
+  }],
+  plotOptions: {
+    line: { animation: false,
+      dataLabels: { enabled: true }
+    }
+  },
+  xAxis: {
+    type: 'datetime',
+    dateTimeLabelFormats: { second: '%H:%M:%S' }
+  },
+  yAxis: {
+    title: { text: 'Current (mA)' }
+  },
+  credits: { enabled: false }
+});
+setInterval(function ( ) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var x = (new Date()).getTime(),
+          y = parseFloat(this.responseText);
+      //console.log(this.responseText);
+      if(chartI.series[0].data.length > 40) {
+        chartI.series[0].addPoint([x, y], true, true, true);
+      } else {
+        chartI.series[0].addPoint([x, y], true, false, true);
+      }
+    }
+  };
+  xhttp.open("GET", "/current", true);
+  xhttp.send();
+}, 1000 ) ;
+
+var chartP = new Highcharts.Chart({
+  chart:{ renderTo:'chart-power' },
+  title: { text: 'INA219 Power' },
+  series: [{
+    showInLegend: false,
+    data: []
+  }],
+  plotOptions: {
+    line: { animation: false,
+      dataLabels: { enabled: true }
+    },
+    series: { color: '#18009c' }
+  },
+  xAxis: {
+    type: 'datetime',
+    dateTimeLabelFormats: { second: '%H:%M:%S' }
+  },
+  yAxis: {
+    title: { text: 'Power (mW)' }
+  },
+  credits: { enabled: false }
+});
+setInterval(function ( ) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var x = (new Date()).getTime(),
+          y = parseFloat(this.responseText);
+      //console.log(this.responseText);
+      if(chartP.series[0].data.length > 40) {
+        chartP.series[0].addPoint([x, y], true, true, true);
+      } else {
+        chartP.series[0].addPoint([x, y], true, false, true);
+      }
+    }
+  };
+  xhttp.open("GET", "/power", true);
+  xhttp.send();
+}, 1000 ) ;
+
+var chartC = new Highcharts.Chart({
+  chart:{ renderTo:'chart-capacity' },
+  title: { text: 'INA219 Capacity' },
+  series: [{
+    showInLegend: false,
+    data: []
+  }],
+  plotOptions: {
+    line: { animation: false,
+      dataLabels: { enabled: true }
+    },
+    series: { color: '#18009c' }
+  },
+  xAxis: {
+    type: 'datetime',
+    dateTimeLabelFormats: { second: '%H:%M:%S' }
+  },
+  yAxis: {
+    title: { text: 'Capacity (mAH)' }
+  },
+  credits: { enabled: false }
+});
+setInterval(function ( ) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var x = (new Date()).getTime(),
+          y = parseFloat(this.responseText);
+      //console.log(this.responseText);
+      if(chartC.series[0].data.length > 40) {
+        chartC.series[0].addPoint([x, y], true, true, true);
+      } else {
+        chartC.series[0].addPoint([x, y], true, false, true);
+      }
+    }
+  };
+  xhttp.open("GET", "/capacity", true);
+  xhttp.send();
+}, 1000 ) ;
+</script>
+</html>
